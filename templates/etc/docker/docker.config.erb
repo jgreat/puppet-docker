@@ -1,0 +1,126 @@
+<% if @attach -%>
+<% @attach.each do |a| -%>
+--attach=<%= a %>
+<% end -%>
+<% end -%>
+<% if @add_host -%>
+<% @add_host.each do |a| -%>
+--add-host=<%= a %>
+<% end -%>
+<% end -%>
+<% if @cap_add -%>
+<% @cap_add.each do |a| -%>
+--cap-add=<%= a %>
+<% end -%>
+<% end -%>
+<% if @cap_drop -%>
+<% @cap_drop.each do |a| -%>
+--cap-drop=<%= a %>
+<% end -%>
+<% end -%>
+<% if @cpu_set -%>
+--cpu-set=<%= @cpu_set %>
+<% end -%>
+<% if @cpu_shares -%>
+--cpu-shares=<%= @cpu_shares %>
+<% end -%>
+<% if @device -%>
+<% @device.each do |a| -%>
+--device=<%= a %>
+<% end -%>
+<% end -%>
+<% if @dns -%>
+<% @dns.each do |a| -%>
+--dns=<%= a %>
+<% end -%>
+<% end -%>
+<% if @dns_search -%>
+<% @dns_search.each do |a| -%>
+--dns-search=<%= a %>
+<% end -%>
+<% end -%>
+<% if @env -%>
+<% @env.each do |a| -%>
+--env=<%= a %>
+<% end -%>
+<% end -%>
+<% if @entrypoint -%>
+--entrypoint=<%= @entrypoint %>
+<% end -%>
+<% if @env_file -%>
+<% @env_file.each do |a| -%>
+--env-file=<%= a %>
+<% end -%>
+<% end -%>
+<% if @expose -%>
+<% @expose.each do |a| -%>
+--expose=<%= a %>
+<% end -%>
+<% end -%>
+<% if @hostname -%>
+--hostname=<%= @hostname %>
+<% end -%>
+<% if @interactive -%>
+--interactive=true
+<% end -%>
+<% if @link -%>
+<% @link.each do |a| -%>
+--link=<%= a %>
+<% end -%>
+<% end -%>
+<% if @lxc_conf -%>
+<% @lxc_conf.each do |a| -%>
+--lxc-conf=<%= a %>
+<% end -%>
+<% end -%>
+<% if @memory_limit -%>
+--memory-limit=<%= @memory_limit %>
+<% end -%>
+<% if @publish -%>
+<% @publish.each do |a| -%>
+--publish=<%= a %>
+<% end -%>
+<% end -%>
+<% if @publish_all -%>
+--publish-all=true
+<% end -%>
+<% if @privliged -%>
+--privliged=true
+<% end -%>
+<% if @restart -%>
+--restart=<%= @restart %>
+<% end -%>
+<% if @security_opt -%>
+<% @security_opt.each do |a| -%>
+--security-opt=<%= a %>
+<% end -%>
+<% end -%>
+<% if @tty -%>
+--tty=true
+<% end -%>
+<% if @user -%>
+--user=<%= @user %>
+<% end -%>
+<% if @volume -%>
+<% @volume.each do |a| -%>
+--volume=<%= a %>
+<% end -%>
+<% end -%>
+<% if @volumes_from -%>
+<% @volumes_from.each do |a| -%>
+--volumes-from=<%= a %>
+<% end -%>
+<% end -%>
+<% if @workdir -%>
+--workdir=<%= @workdir %>
+<% end -%>
+<% if @extra_parameters -%>
+<% @extra_parameters.each do |a| -%>
+<%= a %>
+<% end -%>
+<% end -%>
+--name=<%= @name %>
+<%= @image %>
+<% if @command -%>
+<%= @command %>
+<% end -%>

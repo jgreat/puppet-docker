@@ -1,0 +1,14 @@
+{
+  "name": "jgreat-docker",
+  "version": "0.1.0",
+  "author": "jgreat",
+  "summary": "Manage Docker Containers and Images",
+  "license": "Apache 2.0",
+  "source": "https://github.com/jgreat/puppet-docker.git",
+  "project_page": "https://github.com/jgreat/puppet-docker",
+  "issues_url": "https://github.com/jgreat/puppet-docker/issues",
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
+  ]
+}
+
