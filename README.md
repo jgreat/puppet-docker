@@ -1,4 +1,172 @@
-puppet-docker
-=============
+# docker
 
-Puppet module for managing Docker Containers and Images.
+#### Table of Contents
+
+1. [Overview](#overview)
+2. [Setup](#setup)
+3. [Usage](#usage)
+4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+5. [Limitations - OS compatibility, etc.](#limitations)
+6. [Development - Guide for contributing to the module](#development)
+
+## Overview
+
+The goal of this module is to provide support for Docker containers by extending
+the puppet service type with a 'docker' provider.
+
+Why?  
+
+With the introduction of Docker 1.2 docker containers can be configured to restart automatically on docker service start or on failure. This makes Docker pretty good at maintaining its own processes. Instead of using Upstart, Supervisord or some other external monitor docker containers, this module queries the docker process for status and starts, stops and maintains docker containers "natively".  
+
+## Setup
+
+This module requires docker version >=1.3.1. This will be installed for you if you
+include the docker class.
+
+
+## Usage
+### Install lxc-docker package from docker.com:
+This currently only supports Ubuntu.
+```
+class { 'docker': }
+```
+
+### Add options to the docker daemon:
+This currently only supports Ubuntu.
+See docker documentation for possible options.  
+https://docs.docker.com/reference/commandline/cli/#daemon  
+Under Ubuntu this adds options to `/etc/default/docker`
+```
+class { 'docker':
+  docker_opts => [ '--dns=8.8.8.8', '--insecure-registry=myreg.example.com' ]
+}
+```
+
+### Manage an image:
+Docker >= 1.3.1 is required.  
+You can pull an image before refreshing the docker container service.  
+```
+docker::container { 'repo:port/project/image':
+    tag => 'tag', #optional will use 'latest' as default.
+}
+```
+
+### Manage a container:
+Docker >= 1.3.1 is required.  
+Containers will be named on creation.  
+Most `docker create` options are supported. See docker documentation for more detail.  
+https://docs.docker.com/reference/commandline/cli/#create
+```
+docker::container { 'name':
+      image            => 'repo:port/project/image:tag', #required
+      attach           => [],
+      add_host         => [],
+      cap_add          => [],
+      cap_drop         => [],
+      command          => '',
+      cpu_set          => '',
+      cpu_shares       => '',
+      device           => [],
+      dns              => [],
+      dns_search       => [],
+      env              => [],
+      entrypoint       => '',
+      env_file         => [],
+      expose           => [],
+      hostname         => '',
+      interactive      => true,
+      link             => [],
+      lxc_conf         => [],
+      memory_limit     => '',
+      net              => '',
+      publish          => [],
+      publish_all      => false,
+      privileged       => false,
+      restart          => 'always', #if you change this containers may not restart on daemon restart
+      security_opt     => [],
+      tty              => true,
+      user             => '',
+      volume           => [],
+      volumes_from     => [],
+      workdir          => '',
+      extra_parameters => [], #This passes directly to the docker create command
+}
+```
+
+## Example
+Here's a basic example.  
+`puppet/manifest/site.pp`
+```
+# call the docker class and pass in any daemon options it needs
+class { 'docker':
+  docker_opts => ['--dns=8.8.8.8']
+}
+
+#call in our module class
+class { 'myredisdocker': }
+```
+`puppet/modules/myredisdocker/manifests/init.pp`
+```
+class myredisdocker {
+
+  #Require the docker class. This makes sure docker is installed and the
+  #daemon is started.
+  require docker
+
+  #pull the redis:2.8.17 image from docker.com public repo
+  docker::image { 'redis':
+    tag => '2.8.17'
+  }
+
+  #Start a container.
+  # We will use a volume for persistant data and publish to redis default port
+  docker::container { 'redis':
+    image   => 'redis:2.8.17',
+    volume  => [ '/docker/redis/data:/data' ],
+    publish => [ '6373:6373' ],
+    require => Docker::Image['redis']
+  }
+}
+```
+
+## Reference
+
+This module extends the `service` type with a 'docker' provider to directly interface with the docker daemon though the command line tools. In my opinion this is cleaner then wrapping docker commands in Upstart or Supervisord.
+
+There are a few states a docker container will be in.
+  * disabled - no docker container installed (not listed in docker ps -a)
+  * enabled and stopped - docker container installed but not started(listed in docker ps -a)
+  * enabled and started - docker container installed and running (listed in docker ps)
+
+On resource create the provider will:
+  * docker create
+  * docker start
+
+On resource refresh (i.e. some option has been changed)
+  * docker stop
+  * docker rm
+  * docker create
+  * docker start
+
+So I suggest:
+  * Log your docker container output remotely. Check out progrium/logspout docker image.
+  * Use volumes for persistent data.
+
+## Limitations
+
+Using this module to maintain containers/images:
+ * Docker >=1.3.1
+
+If you want to use this module to maintain the docker service:
+ * Ubuntu 14.04, 12.04
+
+## Development
+Please Help.
+
+Have something awesome to add, want to improve my crappy ruby code (this is my
+ first attempt at ruby so be gentle) fork the github repo and submit a pull request.
+
+## TODO
+  * Add package install and docker daemon config for other OS types (RedHat/CentOS, Debian). I want to use the latest packages from docker.com.
+  * Add require docker >= 1.3.1 in provider.
+  * Add facter script to supply docker version for provider.
