@@ -9,6 +9,10 @@
 #   Array of options to be passed to the docker daemon.
 #   docker_opts => [ '--dns=8.8.8.8', '--insecure-registry=myreg.example.com' ]
 #
+# [*version*]
+# pass version to lxc-docker package.
+# Default is installed. Can be version like '1.3.1' or 'latest'
+# Older versions may not be avalible in the docker.com repo :(
 # === Variables
 #
 # === Examples
@@ -27,9 +31,11 @@
 #
 class docker (
   $docker_opts = [],
+  $version = 'installed',
 ){
 
   validate_array($docker_opts)
+  validate_string($version)
   $docker_options = join($docker_opts, ' ')
 
   case $::operatingsystem {
@@ -47,7 +53,7 @@ class docker (
         require     => Package['apt-transport-https']
       }
       package { 'lxc-docker':
-        ensure  => installed,
+        ensure  => $version,
         require => Apt::Source['docker'],
         notify  => Service['docker'],
       }

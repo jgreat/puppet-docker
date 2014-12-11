@@ -5,9 +5,9 @@
 1. [Overview](#overview)
 2. [Setup](#setup)
 3. [Usage](#usage)
-4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
+4. [Reference](#reference)
+5. [Limitations](#limitations)
+6. [Development](#development)
 
 ## Overview
 
@@ -16,19 +16,25 @@ the puppet service type with a 'docker' provider.
 
 Why?  
 
-With the introduction of Docker 1.2 docker containers can be configured to restart automatically on docker service start or on failure. This makes Docker pretty good at maintaining its own processes. Instead of using Upstart, Supervisord or some other external monitor docker containers, this module queries the docker process for status and starts, stops and maintains docker containers "natively".  
+With the introduction of Docker 1.2 docker containers can be configured to restart automatically on docker service start or on failure. This makes Docker pretty good at maintaining its own processes. Instead of using Upstart, Supervisord or some other external service to monitor docker containers, this module queries the docker process for status and starts, stops and maintains docker containers "natively".  
 
 ## Setup
 
 This module requires docker version >=1.3.1. This will be installed for you if you
 include the docker class.
 
-
 ## Usage
 ### Install lxc-docker package from docker.com:
 This currently only supports Ubuntu.
 ```
 class { 'docker': }
+```
+
+You can also specify a version (older versions may not be available on the docker.com apt repo).
+```
+class { 'docker':
+  version => 'installed' #passes version to package. 'installed', 'latest' or version like '1.3.1'
+}
 ```
 
 ### Add options to the docker daemon:
@@ -82,7 +88,7 @@ docker::container { 'name':
       publish          => [],
       publish_all      => false,
       privileged       => false,
-      restart          => 'always', #if you change this containers may not restart on daemon restart
+      restart          => 'on-failure:5',
       security_opt     => [],
       tty              => true,
       user             => '',
