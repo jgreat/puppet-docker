@@ -1,8 +1,8 @@
 {
   "name": "jgreat-docker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "jgreat",
-  "summary": "Manage Docker Containers and Images",
+  "summary": "Manage docker containers natively with a 'docker' Service Provider",
   "license": "Apache-2.0",
   "source": "https://github.com/jgreat/puppet-docker.git",
   "project_page": "https://github.com/jgreat/puppet-docker",
