@@ -10,6 +10,7 @@
 6. [Development](#development)
 
 ## Overview
+Updated for Docker 1.6.0
 
 The goal of this module is to provide support for Docker containers by extending
 the puppet service type with a 'docker' provider.
@@ -69,32 +70,44 @@ docker::container { 'name':
       add_host         => [],
       cap_add          => [],
       cap_drop         => [],
-      command          => '',
-      cpu_set          => '',
-      cpu_shares       => '',
+      cgroup_parent    => undef,
+      command          => undef,
+      cpu_set          => undef,
+      cpuset_cpus      => undef,
+      cpu_shares       => undef,
       device           => [],
       dns              => [],
       dns_search       => [],
       env              => [],
-      entrypoint       => '',
+      entrypoint       => undef,
       env_file         => [],
       expose           => [],
-      hostname         => '',
+      hostname         => undef,
       interactive      => false,
+      ipc              => undef,
+      label            => [],
+      lable_file       => [],
       link             => [],
+      log_driver       => undef,
       lxc_conf         => [],
-      memory_limit     => '',
-      net              => '',
+      mac_address      => undef,
+      memory           => undef,
+      memory_limit     => undef,
+      memory_swap      => undef,
+      net              => undef,
+      pid              => undef,
       publish          => [],
       publish_all      => false,
       privileged       => false,
-      restart          => 'on-failure:5',
+      read_only        => false,
+      restart          => 'always',
       security_opt     => [],
       tty              => false,
-      user             => '',
+      ulimit           => [],
+      user             => undef,
       volume           => [],
       volumes_from     => [],
-      workdir          => '',
+      workdir          => undef,
       extra_parameters => [], #This passes directly to the docker create command
 }
 ```
@@ -174,5 +187,3 @@ Have something awesome to add, want to improve my crappy ruby code (this is my
 
 ## TODO
   * Add package install and docker daemon config for other OS types (RedHat/CentOS, Debian). I want to use the latest packages from docker.com.
-  * Add require docker >= 1.3.1 in provider.
-  * Add facter script to supply docker version for provider.

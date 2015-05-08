@@ -50,8 +50,10 @@ define docker::container (
   $add_host = [],
   $cap_add = [],
   $cap_drop = [],
+  $cgroup_parent = undef,
   $command = undef,
   $cpu_set = undef,
+  $cpuset_cpus = undef,
   $cpu_shares = undef,
   $device = [],
   $dns = [],
@@ -63,28 +65,41 @@ define docker::container (
   $extra_parameters = [],
   $hostname = undef,
   $interactive = false,
+  $ipc = undef,
+  $label = [],
+  $lable_file = [],
   $link = [],
+  $log_driver = undef,
   $lxc_conf = [],
+  $mac_address = undef,
+  $memory = undef,
   $memory_limit = undef,
+  $memory_swap = undef,
   $net = undef,
+  $pid = undef,
   $publish = [],
   $publish_all = false,
   $privileged = false,
+  $read_only = false,
   $restart = 'always',
   $security_opt = [],
   $tty = false,
+  $ulimit = [],
   $user = undef,
   $volume = [],
   $volumes_from = [],
   $workdir = undef,
 ) {
+
   validate_array($attach)
   validate_array($add_host)
   validate_array($cap_add)
   validate_array($cap_drop)
+  validate_string($cgroup_parent) #new docker 1.6.0
   #cidfile not needed
   validate_string($command)
-  validate_string($cpu_set)
+  validate_string($cpu_set) #deprecated 1.6.0
+  validate_string($cpuset_cpus) #new docker 1.6.0
   validate_string($cpu_shares)
   validate_array($device)
   validate_array($dns)
@@ -95,21 +110,30 @@ define docker::container (
   validate_array($expose)
   validate_string($hostname)
   validate_bool($interactive)
+  validate_string($ipc) #new docker 1.6.0
+  validate_array($label) #new docker 1.6.0
+  validate_array($lable_file) #new docker 1.6.0
   validate_string($image)
   validate_array($link)
+  validate_string($log_driver) #new docker 1.6.0
   validate_array($lxc_conf)
-  validate_string($memory_limit)
+  validate_string($mac_address) #new docker 1.6.0
+  validate_string($memory_limit) #deprecated 1.6.0
+  validate_string($memory) #new docker 1.6.0
+  validate_string($memory_swap) #new docker 1.6.0
   #name is always defined as title
   validate_string($net)
   validate_array($publish)
   validate_bool($publish_all)
   validate_bool($privileged)
+  validate_bool($read_only) #new docker 1.6.0
   validate_string($restart)
   validate_array($security_opt)
   validate_bool($tty)
   validate_string($user)
   validate_array($volume)
   validate_array($volumes_from)
+  validate_array($ulimit) #new docker 1.6.0
   validate_string($workdir)
 
   #Other params that docker create might add
@@ -131,10 +155,10 @@ define docker::container (
     notify  => Service[$title],
   }
   service { $title:
-    ensure     => running,
-    enable     => true,
-    provider   => 'docker',
-    manifest   => $config_file,
-    require    => File[$config_file],
+    ensure   => running,
+    enable   => true,
+    provider => 'docker',
+    manifest => $config_file,
+    require  => File[$config_file],
   }
 }

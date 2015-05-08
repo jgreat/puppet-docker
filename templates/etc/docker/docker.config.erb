@@ -18,8 +18,14 @@
 --cap-drop=<%= a %>
 <% end -%>
 <% end -%>
+<% if @cgroup_parent -%>
+--cgroup-parent=<% @cgroup_parent %>
+<% end -%>
 <% if @cpu_set -%>
 --cpu-set=<%= @cpu_set %>
+<% end -%>
+<% if @cpuset_cpus -%>
+--cpuset-cpus=<%= @cpuset_cpus %>
 <% end -%>
 <% if @cpu_shares -%>
 --cpu-shares=<%= @cpu_shares %>
@@ -44,7 +50,7 @@
 --env=<%= a %>
 <% end -%>
 <% end -%>
-<% if @entrypoint -%>
+<% if @entrypoint %>
 --entrypoint=<%= @entrypoint %>
 <% end -%>
 <% if @env_file -%>
@@ -63,6 +69,19 @@
 <% if @interactive -%>
 --interactive=true
 <% end -%>
+<% if @ipc -%>
+--ipc<%= @ipc %>
+<% end -%>
+<% if @lable -%>
+<% @lable.each do |a| -%>
+--lable=<%= a %>
+<% end -%>
+<% end -%>
+<% if @label_file -%>
+<% @lable_file.each do |a| -%>
+--lable-file=<%= a %>
+<% end -%>
+<% end -%>
 <% if @link -%>
 <% @link.each do |a| -%>
 --link=<%= a %>
@@ -73,8 +92,20 @@
 --lxc-conf=<%= a %>
 <% end -%>
 <% end -%>
+<% if @mac_address -%>
+--mac-address=<%= @mac_address %>
+<% end -%>
+<% if @memory -%>
+--memory=<%= @memory %>
+<% end -%>
 <% if @memory_limit -%>
 --memory-limit=<%= @memory_limit %>
+<% end -%>
+<% if @memory_swap -%>
+--memory-swap=<%= @memory_swap %>
+<% end -%>
+<% if @net -%>
+--net=<%= @net %>
 <% end -%>
 <% if @publish -%>
 <% @publish.each do |a| -%>
@@ -84,8 +115,11 @@
 <% if @publish_all -%>
 --publish-all=true
 <% end -%>
-<% if @privliged -%>
---privliged=true
+<% if @privileged -%>
+--privileged=true
+<% end -%>
+<% if @read_only -%>
+--read-only=true
 <% end -%>
 <% if @restart -%>
 --restart=<%= @restart %>
@@ -109,6 +143,11 @@
 <% if @volumes_from -%>
 <% @volumes_from.each do |a| -%>
 --volumes-from=<%= a %>
+<% end -%>
+<% end -%>
+<% if @ulimit -%>
+<% @ulimit.each do |a| -%>
+--ulimit=<%= a %>
 <% end -%>
 <% end -%>
 <% if @workdir -%>

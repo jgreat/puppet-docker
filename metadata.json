@@ -1,6 +1,6 @@
 {
   "name": "jgreat-docker",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": "jgreat",
   "summary": "Manage docker containers natively with a 'docker' Service Provider",
   "license": "Apache-2.0",
