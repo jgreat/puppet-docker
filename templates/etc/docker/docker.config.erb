@@ -87,6 +87,9 @@
 --link=<%= a %>
 <% end -%>
 <% end -%>
+<% if @log_driver -%>
+--log-driver=<%= @log_driver %>
+<% end -%>
 <% if @lxc_conf -%>
 <% @lxc_conf.each do |a| -%>
 --lxc-conf=<%= a %>
