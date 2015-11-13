@@ -4,7 +4,6 @@
 # Uses latest packages from docker.com.
 #
 # === Parameters
-#
 # [*docker_opts*]
 #   Array of options to be passed to the docker daemon.
 #   docker_opts => [ '--dns=8.8.8.8', '--insecure-registry=myreg.example.com' ]
@@ -43,25 +42,37 @@ class docker (
       package { 'apt-transport-https':
         ensure => installed,
       }
+      # remove old docker apt repo
       apt::source { 'docker':
-        location    => 'https://get.docker.com/ubuntu',
-        release     => 'docker',
-        repos       => 'main',
-        key         => 'D8576A8BA88D21E9',
-        key_server  => 'keyserver.ubuntu.com',
-        include_src => false,
-        require     => Package['apt-transport-https']
+        ensure => absent,
       }
-      package { 'lxc-docker':
+      # Use new dockerproject repo and docker-engine package.
+      apt::source { 'dockerproject':
+        location    => 'https://apt.dockerproject.org/repo',
+        release     => "ubuntu-${::lsbdistcodename}",
+        repos       => 'main',
+        key         => 'F76221572C52609D',
+        key_server  => 'hkp://p80.pool.sks-keyservers.net:80',
+        include_src => false,
+        require     => [
+          Package['apt-transport-https'],
+        ],
+      }
+
+      package { 'docker-engine':
         ensure  => $version,
-        require => Apt::Source['docker'],
+        require => [
+          Apt::Source['dockerproject'],
+          Class[Apt::Update],
+        ],
         notify  => Service['docker'],
       }
+
       file_line { 'default_docker':
         path    => '/etc/default/docker',
         line    => "DOCKER_OPTS=\"${docker_options}\"",
-        match   => 'DOCKER_OPTS=.*',
-        require => Package['lxc-docker'],
+        match   => '^DOCKER_OPTS=.*',
+        require => Package['docker-engine'],
         notify  => Service['docker'],
       }
     }
@@ -72,10 +83,10 @@ class docker (
   }
 
   service { 'docker':
-    ensure   => running,
-    enable   => true,
-    require  => [
-      Package['lxc-docker'],
+    ensure  => running,
+    enable  => true,
+    require => [
+      Package['docker-engine'],
       File_line['default_docker'],
     ],
   }

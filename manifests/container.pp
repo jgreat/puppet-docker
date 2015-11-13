@@ -46,17 +46,24 @@
 #
 define docker::container (
   $image,
+  $ensure = 'present',
   $attach = [],
   $add_host = [],
+  $blkio_weight = undef,
   $cap_add = [],
   $cap_drop = [],
   $cgroup_parent = undef,
   $command = undef,
+  $cpu_period = undef,
+  $cpu_quota = undef,
   $cpu_set = undef,
   $cpuset_cpus = undef,
+  $cpuset_mems = undef,
   $cpu_shares = undef,
   $device = [],
+  $disable_content_trust = true,
   $dns = [],
+  $dns_opt = [],
   $dns_search = [],
   $env = [],
   $entrypoint = undef,
@@ -66,16 +73,21 @@ define docker::container (
   $hostname = undef,
   $interactive = false,
   $ipc = undef,
+  $kernel_memory = undef,
   $label = [],
   $lable_file = [],
   $link = [],
   $log_driver = undef,
+  $log_opt = [],
   $lxc_conf = [],
   $mac_address = undef,
   $memory = undef,
   $memory_limit = undef,
+  $memory_reservation = undef,
   $memory_swap = undef,
+  $memory_swappiness = '-1',
   $net = undef,
+  $oom_kill_disable = false,
   $pid = undef,
   $publish = [],
   $publish_all = false,
@@ -83,26 +95,35 @@ define docker::container (
   $read_only = false,
   $restart = 'always',
   $security_opt = [],
+  $stop_signal = 'SIGTERM',
   $tty = false,
   $ulimit = [],
   $user = undef,
+  $uts = undef,
   $volume = [],
   $volumes_from = [],
+  $volume_driver = undef,
   $workdir = undef,
 ) {
 
   validate_array($attach)
   validate_array($add_host)
+  validate_string($blkio_weight)   #new docker 1.7.0
   validate_array($cap_add)
   validate_array($cap_drop)
-  validate_string($cgroup_parent) #new docker 1.6.0
+  validate_string($cgroup_parent)  #new docker 1.6.0
   #cidfile not needed
   validate_string($command)
-  validate_string($cpu_set) #deprecated 1.6.0
-  validate_string($cpuset_cpus) #new docker 1.6.0
+  validate_string($cpu_set)        #deprecated 1.6.0
+  validate_string($cpuset_cpus)    #new docker 1.6.0
+  validate_string($cpuset_mems)    #new docker 1.9.0
+  validate_string($cpu_period)     #new docker 1.7.0
+  validate_string($cpu_quota)      #new docker 1.7.0
   validate_string($cpu_shares)
   validate_array($device)
+  validate_bool($disable_content_trust) #new docker 1.9.0
   validate_array($dns)
+  validate_array($dns_opt)         #new docker 1.9.0
   validate_array($dns_search)
   validate_array($env)
   validate_string($entrypoint)
@@ -110,30 +131,39 @@ define docker::container (
   validate_array($expose)
   validate_string($hostname)
   validate_bool($interactive)
-  validate_string($ipc) #new docker 1.6.0
-  validate_array($label) #new docker 1.6.0
-  validate_array($lable_file) #new docker 1.6.0
+  validate_string($ipc)            #new docker 1.6.0
+  validate_string($kernel_memory)  #new docker 1.9.0
+  validate_array($label)           #new docker 1.6.0
+  validate_array($lable_file)      #new docker 1.6.0
   validate_string($image)
   validate_array($link)
-  validate_string($log_driver) #new docker 1.6.0
+  validate_string($log_driver)     #new docker 1.6.0
+  validate_array($log_opt)         #new docker 1.7.0
   validate_array($lxc_conf)
-  validate_string($mac_address) #new docker 1.6.0
-  validate_string($memory_limit) #deprecated 1.6.0
-  validate_string($memory) #new docker 1.6.0
-  validate_string($memory_swap) #new docker 1.6.0
+  validate_string($mac_address)    #new docker 1.6.0
+  validate_string($memory)         #new docker 1.6.0
+  validate_string($memory_limit)   #deprecated 1.6.0
+  validate_string($memory_reservation) #new docker 1.9.0
+  validate_string($memory_swap)    #new docker 1.6.0
+  validate_string($memory_swappiness) #new docker 1.9.0
   #name is always defined as title
   validate_string($net)
+  validate_bool($oom_kill_disable) #new docker 1.7.0
+  validate_string($pid)
   validate_array($publish)
   validate_bool($publish_all)
   validate_bool($privileged)
-  validate_bool($read_only) #new docker 1.6.0
+  validate_bool($read_only)        #new docker 1.6.0
   validate_string($restart)
   validate_array($security_opt)
+  validate_string($stop_signal)    #new docker 1.9.0
   validate_bool($tty)
+  validate_array($ulimit)          #new docker 1.6.0
   validate_string($user)
+  validate_string($uts)            #new docker 1.7.0
   validate_array($volume)
+  validate_string($volume_driver)  #new docker 1.9.0
   validate_array($volumes_from)
-  validate_array($ulimit) #new docker 1.6.0
   validate_string($workdir)
 
   #Other params that docker create might add
@@ -142,23 +172,34 @@ define docker::container (
   $config_dir = '/etc/docker'
   $config_file = "${config_dir}/${title}.config"
 
-  if (! defined(File[$config_dir])) {
-    file { $config_dir:
-      ensure => directory,
+  if ($ensure == 'present'){
+    if (! defined(File[$config_dir])) {
+      file { $config_dir:
+        ensure => directory,
+      }
+    }
+    file { $config_file:
+      ensure  => file,
+      mode    => '0600',
+      content => template('docker/etc/docker/docker.config.erb'),
+      require => File[$config_dir],
+      notify  => Service[$title],
+    }
+    service { $title:
+      ensure   => running,
+      enable   => true,
+      provider => 'docker',
+      manifest => $config_file,
+      require  => File[$config_file],
     }
   }
-  file { $config_file:
-    ensure  => file,
-    mode    => '0600',
-    content => template('docker/etc/docker/docker.config.erb'),
-    require => File[$config_dir],
-    notify  => Service[$title],
-  }
-  service { $title:
-    ensure   => running,
-    enable   => true,
-    provider => 'docker',
-    manifest => $config_file,
-    require  => File[$config_file],
+  if ($ensure == 'absent') {
+    file{ $config_file:
+      ensure => absent
+    }
+    service { $title:
+      enable   => false,
+      provider => 'docker',
+    }
   }
 }

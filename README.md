@@ -10,7 +10,8 @@
 6. [Development](#development)
 
 ## Overview
-Updated for Docker 1.6.0
+* Updated for Docker 1.9.0
+* Updated to use newer apt.dockerproject.org repo and docker-engine package.
 
 The goal of this module is to provide support for Docker containers by extending
 the puppet service type with a 'docker' provider.
@@ -25,8 +26,8 @@ This module requires docker version >=1.3.1. This will be installed for you if y
 include the docker class.
 
 ## Usage
-### Install lxc-docker package from docker.com:
-This currently only supports Ubuntu.
+### Install docker-engine package from apt.dockerproject.org:
+This is optional, currently only supports Ubuntu.
 ```
 class { 'docker': }
 ```
@@ -34,14 +35,14 @@ class { 'docker': }
 You can also specify a version (older versions may not be available on the docker.com apt repo).
 ```
 class { 'docker':
-  version => 'installed' #passes version to package. 'installed', 'latest' or version like '1.3.1'
+  version => 'installed' #passes version to package. 'installed', 'latest' or version like "1.8.1-0~${::lsbdistcodename}"
 }
 ```
 
 ### Add options to the docker daemon:
-This currently only supports Ubuntu.
-See docker documentation for possible options.  
-https://docs.docker.com/reference/commandline/cli/#daemon  
+This is optional, currently only supports Ubuntu.
+See docker documentation for possible options.
+https://docs.docker.com/reference/commandline/cli/daemon/  
 Under Ubuntu this adds options to `/etc/default/docker`
 ```
 class { 'docker':
@@ -59,56 +60,62 @@ docker::container { 'repo:port/project/image':
 ```
 
 ### Manage a container:
-Docker >= 1.3.1 is required.  
 Containers will be named on creation.  
 Most `docker create` options are supported. See docker documentation for more detail.  
-https://docs.docker.com/reference/commandline/cli/#create
+https://docs.docker.com/reference/commandline/cli/create/
 ```
 docker::container { 'name':
-      image            => 'repo:port/project/image:tag', #required
-      attach           => [],
-      add_host         => [],
-      cap_add          => [],
-      cap_drop         => [],
-      cgroup_parent    => undef,
-      command          => undef,
-      cpu_set          => undef,
-      cpuset_cpus      => undef,
-      cpu_shares       => undef,
-      device           => [],
-      dns              => [],
-      dns_search       => [],
-      env              => [],
-      entrypoint       => undef,
-      env_file         => [],
-      expose           => [],
-      hostname         => undef,
-      interactive      => false,
-      ipc              => undef,
-      label            => [],
-      lable_file       => [],
-      link             => [],
-      log_driver       => undef,
-      lxc_conf         => [],
-      mac_address      => undef,
-      memory           => undef,
-      memory_limit     => undef,
-      memory_swap      => undef,
-      net              => undef,
-      pid              => undef,
-      publish          => [],
-      publish_all      => false,
-      privileged       => false,
-      read_only        => false,
-      restart          => 'always',
-      security_opt     => [],
-      tty              => false,
-      ulimit           => [],
-      user             => undef,
-      volume           => [],
-      volumes_from     => [],
-      workdir          => undef,
-      extra_parameters => [], #This passes directly to the docker create command
+      image              => 'repo:port/project/image:tag', #required
+      attach             => [],
+      add_host           => [],
+      cap_add            => [],
+      cap_drop           => [],
+      cgroup_parent      => undef,
+      command            => undef,
+      cpu_set            => undef,
+      cpuset_cpus        => undef,
+      cpuset_mems        => undef,
+      cpu_shares         => undef,
+      device             => [],
+      dns                => [],
+      dns_opt            => [],
+      dns_search         => [],
+      env                => [],
+      entrypoint         => undef,
+      env_file           => [],
+      expose             => [],
+      hostname           => undef,
+      interactive        => false,
+      ipc                => undef,
+      kernel_memory      => undef,
+      label              => [],
+      lable_file         => [],
+      link               => [],
+      log_driver         => undef,
+      lxc_conf           => [],
+      mac_address        => undef,
+      memory             => undef,
+      memory_limit       => undef,
+      memory_reservation => undef,
+      memory_swap        => undef,
+      memory_swappiness  => '-1',
+      net                => undef,
+      pid                => undef,
+      publish            => [],
+      publish_all        => false,
+      privileged         => false,
+      read_only          => false,
+      restart            => 'always',
+      security_opt       => [],
+      stop_signal        => 'SIGTERM',
+      tty                => false,
+      ulimit             => [],
+      user               => undef,
+      volume             => [],
+      volume_driver      => undef,
+      volumes_from       => [],
+      workdir            => undef,
+      extra_parameters   => [], #This passes directly to the docker create command
 }
 ```
 
@@ -168,8 +175,8 @@ On resource refresh (i.e. some option has been changed)
   * docker start
 
 So I suggest:
-  * Log your docker container output remotely. Check out progrium/logspout docker image.
-  * Use volumes for persistent data.
+  * Log your docker container output remotely. Use `log_driver => syslog` or check out gliderlabs/logspout docker image.
+  * Use volumes option for persistent data.
 
 ## Limitations
 

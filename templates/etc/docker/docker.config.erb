@@ -8,6 +8,9 @@
 --add-host=<%= a %>
 <% end -%>
 <% end -%>
+<% if @blkio_weight -%>
+--blkio-weight=<%= @blkio_weight %>
+<% end -%>
 <% if @cap_add -%>
 <% @cap_add.each do |a| -%>
 --cap-add=<%= a %>
@@ -26,6 +29,12 @@
 <% end -%>
 <% if @cpuset_cpus -%>
 --cpuset-cpus=<%= @cpuset_cpus %>
+<% end -%>
+<% if @cpu_peroid -%>
+--cpu-peroid=<%= @cpu_peroid %>
+<% end -%>
+<% if @cpu_quota -%>
+--cpu-quota=<%= @cpu_quota %>
 <% end -%>
 <% if @cpu_shares -%>
 --cpu-shares=<%= @cpu_shares %>
@@ -90,6 +99,11 @@
 <% if @log_driver -%>
 --log-driver=<%= @log_driver %>
 <% end -%>
+<% if @log_opt -%>
+<% @log_opt.each do |a| -%>
+--log-opt=<%= a %>
+<% end -%>
+<% end -%>
 <% if @lxc_conf -%>
 <% @lxc_conf.each do |a| -%>
 --lxc-conf=<%= a %>
@@ -109,6 +123,9 @@
 <% end -%>
 <% if @net -%>
 --net=<%= @net %>
+<% end -%>
+<% if @oom_kill_disable -%>
+--oom-kill-disable=true
 <% end -%>
 <% if @publish -%>
 <% @publish.each do |a| -%>
@@ -153,6 +170,9 @@
 --ulimit=<%= a %>
 <% end -%>
 <% end -%>
+<% if @uts -%>
+--uts=<%= @uts %>
+<% end -%>
 <% if @workdir -%>
 --workdir=<%= @workdir %>
 <% end -%>
@@ -164,5 +184,7 @@
 --name=<%= @name %>
 <%= @image %>
 <% if @command -%>
-<%= @command %>
+<% @command.split(%r{\s+}).each do |a| -%>
+<%= a %>
+<% end -%>
 <% end -%>

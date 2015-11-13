@@ -6,9 +6,11 @@
 #
 # Parameters:
 # Option parameters:
-# ensure => true - pull a docker image
-# ensure => false - remove docker image
+# ensure => "latest" - pull a docker image
+# ensure => "0.1.1" - tag version docker image
+# ensure => "absent" - remove docker image
 # tag => '0.1.1' - pull/remove a specific tag for the repo default is 'latest'
+# image => 'myrepo.jgreat.me:port/myimage'
 #
 # Requires:
 # - docker class
@@ -21,26 +23,38 @@
 #    }
 #
 define docker::image (
-    $tag = 'latest',
-    $ensure = true
+    $ensure = 'latest',
+    $tag = undef,
+    $image = $title,
 ) {
-  validate_bool($ensure)
+  validate_string($ensure)
   validate_string($tag)
+  validate_string($image)
+
+  if (!$tag) {
+    $image_tag = $ensure
+  } else {
+    $image_tag = $tag
+  }
+
+  # if ensure == absent and tag not defined, tag = latest
+  if (($ensure == 'absent') and ($image_tag == 'absent')) {
+    $image_tag = 'latest'
+  }
 
   #Defaults for types
   Exec {
     path => '/bin:/usr/bin',
   }
 
-  if $ensure {
-    #add image if its not there
-    exec { "docker pull ${title}:${tag}":
-      unless => "docker images ${title} | awk '{print \$2}' | grep ${tag}",
+  if ($ensure == 'absent') {
+    #remove images if they exist
+    exec { "docker rmi ${image}:${image_tag}":
+      onlyif => "docker images -q ${image} | awk '{print \$2}' | grep ${image_tag}",
     }
   } else {
-    #remove images if they exist
-    exec { "docker rmi ${title}:${tag}":
-      onlyif => "docker images -q ${title} | awk '{print \$2}' | grep ${tag}",
+    exec { "docker pull ${image}:${image_tag}":
+      unless => "docker images ${image} | awk '{print \$2}' | grep ${image_tag}",
     }
   }
 }
