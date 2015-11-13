@@ -30,6 +30,9 @@
 <% if @cpuset_cpus -%>
 --cpuset-cpus=<%= @cpuset_cpus %>
 <% end -%>
+<% if @cpuset_mems -%>
+--cpuset-mems=<%= @cpuset_mems %>
+<% end -%>
 <% if @cpu_peroid -%>
 --cpu-peroid=<%= @cpu_peroid %>
 <% end -%>
@@ -44,9 +47,17 @@
 --device=<%= a %>
 <% end -%>
 <% end -%>
+<% if !@disable_content_trust -%>
+--disable-content-trust=false
+<% end -%>
 <% if @dns -%>
 <% @dns.each do |a| -%>
 --dns=<%= a %>
+<% end -%>
+<% end -%>
+<% if @dns_opt -%>
+<% @dns_opt.each do |a| -%>
+--dns_opt=<%= a %>
 <% end -%>
 <% end -%>
 <% if @dns_search -%>
@@ -80,6 +91,9 @@
 <% end -%>
 <% if @ipc -%>
 --ipc<%= @ipc %>
+<% end -%>
+<% if @kernel_memory -%>
+--kernel-memory<%= @kernel_memory %>
 <% end -%>
 <% if @lable -%>
 <% @lable.each do |a| -%>
@@ -118,8 +132,14 @@
 <% if @memory_limit -%>
 --memory-limit=<%= @memory_limit %>
 <% end -%>
+<% if @memory_reservation -%>
+--memory-reservation=<%= @memory_reservation %>
+<% end -%>
 <% if @memory_swap -%>
 --memory-swap=<%= @memory_swap %>
+<% end -%>
+<% if @memory_swappiness -%>
+--memory-swappiness=<%= @memory_swappiness %>
 <% end -%>
 <% if @net -%>
 --net=<%= @net %>
@@ -149,6 +169,9 @@
 --security-opt=<%= a %>
 <% end -%>
 <% end -%>
+<% if @stop_signal -%>
+--stop-signal=<%= @stop_signal %>
+<% end -%>
 <% if @tty -%>
 --tty=true
 <% end -%>
@@ -159,6 +182,9 @@
 <% @volume.each do |a| -%>
 --volume=<%= a %>
 <% end -%>
+<% end -%>
+<% if @volume_driver -%>
+--volume-driver=<%= @volume_driver %>
 <% end -%>
 <% if @volumes_from -%>
 <% @volumes_from.each do |a| -%>
